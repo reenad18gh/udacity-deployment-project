@@ -1,0 +1,12 @@
+branch-defaults:
+  default:
+    environment: backend-env
+environment-defaults:
+  backend-env:
+    branch: null
+    repository: null
+global:
+  application_name: backend-app
+  default_region: us-east-1
+  profile: null
+  sc: null
