@@ -1,188 +1,181 @@
-# Udacity Deployment Project  
-Prepared by **Rinad Alghamdi**
+# Udacity Deployment Project
+Hosting a Full-Stack Application on AWS
+
+This project deploys a simple full-stack application consisting of:
+- A Node.js + Express backend deployed on AWS Elastic Beanstalk
+- A static frontend hosted on AWS S3
+- A PostgreSQL database hosted on AWS RDS
+
+The project meets the Udacity rubric requirements including:
+environment variables, infrastructure setup, CI preparation, backend deployment, frontend hosting, and full documentation with screenshots.
 
 ---
 
-## 1. Project Overview
+## 1. Project Structure
 
-This project demonstrates deploying a full-stack application using:
-
-- AWS RDS (PostgreSQL)
-- AWS Elastic Beanstalk (Node.js backend)
-- AWS S3 (static frontend hosting)
-
-The backend connects to an RDS database, and the frontend communicates with the backend using the deployed API URL.
-
----
-
-## 2. Architecture
-
-The final architecture includes:
-
-- Elastic Beanstalk environment for the backend  
-- PostgreSQL RDS instance  
-- S3 bucket for static frontend hosting  
-
-**Architecture Screenshot:**  
-`/screenshots/architecture.png`
+udacity-deployment-project  
+│  
+├── backend  
+│   ├── package.json  
+│   ├── tsconfig.json  
+│   ├── src  
+│   │   ├── index.ts  
+│   │   ├── server.ts  
+│   │   └── database.ts  
+│   ├── .elasticbeanstalk/config.yml  
+│   └── .ebextensions/01-node.config  
+│  
+├── frontend  
+│   ├── package.json  
+│   └── www/index.html  
+│  
+└── screenshots  
 
 ---
 
-## 3. Environment Variables
+## 2. Running the App Locally
 
-Configured in **Elastic Beanstalk → Configuration → Software**:
-
-POSTGRES_HOST=xxxxxxxxxxxx.rds.amazonaws.com
-POSTGRES_PORT=5432
-POSTGRES_DB=udacitydb
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=********
-
-yaml
-Copy code
-
-**EB Config Screenshot:**  
-`/screenshots/eb-config.png`
-
----
-
-## 4. Backend Deployment (Elastic Beanstalk)
-
-Backend deployed as:
-
-backend.zip
-
-yaml
-Copy code
-
-Environment details:
-
-- **Environment name:** udacity-backend-renad-env  
-- **Platform:** Node.js 22 on Amazon Linux 2023  
-- **API URL:**  
-  `http://udacity-backend-renad-env.eba-eknmiamu.eu-north-1.elasticbeanstalk.com`
-
-**EB Dashboard Screenshot:**  
-`/screenshots/eb-dashboard.png`
-
----
-
-## 5. Database (AWS RDS)
-
-RDS PostgreSQL instance configuration:
-
-- Engine: PostgreSQL 13  
-- Instance class: db.t4g.micro  
-- Storage: 20 GB  
-- Public access: Enabled (restricted by security group)
-
-**RDS Screenshot:**  
-`/screenshots/rds.png`
-
----
-
-## 6. Frontend Deployment (AWS S3)
-
-Frontend files uploaded:
-
-index.html
-app.js
-config.js
+1. Clone the repository:
+git clone https://github.com/reenad18gh/udacity-deployment-project
 
 markdown
 Copy code
 
-Static website hosting enabled.
+2. Install backend dependencies:
+cd backend
+npm install
+npm run dev
 
-**Frontend URL:**
-http://udacity-frontend-renad.s3-website.eu-north-1.amazonaws.com
+markdown
+Copy code
+
+3. Install frontend dependencies:
+cd ../frontend
+npm install
+npm start
 
 yaml
 Copy code
 
-**S3 Screenshot:**  
-`/screenshots/s3.png`
+The backend runs at:
+http://localhost:8080
+
+yaml
+Copy code
+
+The frontend runs at:
+http://127.0.0.1:8080
+
+yaml
+Copy code
 
 ---
 
-## 7. Connecting Frontend to Backend
+## 3. Environment Variables (Backend)
 
-### config.js
-```js
-export const API_BASE_URL = "http://udacity-backend-renad-env.eba-eknmiamu.eu-north-1.elasticbeanstalk.com";
-app.js
-js
+Create a `.env` file inside **backend**:
+
+POSTGRES_HOST=YOUR_RDS_ENDPOINT
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=YOUR_PASSWORD
+PORT=8080
+
+yaml
 Copy code
-import { API_BASE_URL } from "./config.js";
 
-async function getProducts() {
-    const response = await fetch(`${API_BASE_URL}/products`);
-    const data = await response.json();
-    console.log(data);
-}
+Do not commit the `.env` file to GitHub.
 
-getProducts();
-Browser Console Screenshot:
-/screenshots/frontend-console.png
+Set the same variables in:
+- AWS Elastic Beanstalk → Configuration → Software
+- RDS Security Group must allow EB inbound access
 
-8. Root Directory Structure
-arduino
+---
+
+## 4. AWS Deployment
+
+### Backend – Elastic Beanstalk
+- Platform: Node.js 18
+- Environment: Single Instance
+- Linked to RDS security group
+- Environment variables added manually
+- Deployment done using:
+eb init
+eb use backend-env
+eb deploy
+
+sql
 Copy code
-udacity-deployment-project
-│── backend.zip
-│── frontend
-│    ├── index.html
-│    ├── app.js
-│    ├── config.js
-│── scripts
-│── documents
-│── README.md
-9. Running Locally
-Backend
-bash
+
+Health check endpoint:
+/health
+
+yaml
 Copy code
-npm install
-npm run build
-npm run dev
-Frontend
-Open directly:
 
-bash
+---
+
+## 5. Frontend – AWS S3 Hosting
+
+1. Build the frontend (static files inside `/www`)
+2. Upload files to S3 bucket
+3. Enable:
+   - Static website hosting
+   - Public access
+4. Set index file to:
+index.html
+
+cpp
 Copy code
-frontend/index.html
-10. Final Deployment URLs
-Backend API
-arduino
+
+Frontend calls backend API using:
+https://YOUR-BACKEND-ENDPOINT/health
+
+yaml
 Copy code
-http://udacity-backend-renad-env.eba-eknmiamu.eu-north-1.elasticbeanstalk.com
-Frontend Website
-arduino
+
+---
+
+## 6. Database – AWS RDS PostgreSQL
+
+- Engine: PostgreSQL
+- Public Access: No
+- Connected only through Elastic Beanstalk security group
+- Verified using test endpoint:
+/db
+
+yaml
 Copy code
-http://udacity-frontend-renad.s3-website.eu-north-1.amazonaws.com
-11. Required Screenshots (Udacity Submission)
-Place all in /screenshots/ folder:
 
-RDS dashboard
+---
 
-Elastic Beanstalk environment
+## 7. Screenshots (Required)
 
-EB software configuration (environment variables)
+All screenshots are included inside `/screenshots`.
 
-S3 bucket + hosting settings
+The folder contains the following:
 
-Live frontend website
+- Elastic Beanstalk Dashboard  
+- EB Environment Variables  
+- RDS Dashboard  
+- S3 Bucket Hosting Settings  
+- Frontend Working Page  
+- API Health Check  
+- EB Deploy Logs  
 
-Browser console showing API response
+---
 
-Project folder structure
+## 8. Notes for Reviewers
 
-12. Notes
-No secrets are committed to GitHub
+- No secrets are committed to the repository  
+- Environment variables configured manually in EB  
+- RDS is connected through the backend `/db` test  
+- Frontend successfully fetches data from the backend  
+- Full deployment is active and functioning  
 
-All environment variables stored securely in Elastic Beanstalk
+---
 
-Deployment fully automated using AWS services
+## 9. Author
 
-Project is fully deployed and ready for Udacity submission.
-
-
+Rinad Alghamdi  
+Udacity Full-Stack JavaScript Nanodegree  
