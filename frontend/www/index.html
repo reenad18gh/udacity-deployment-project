@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Frontend Works</h2>
+    <p>API test</p>
+    <button onclick="test()">Test</button>
+
+    <script>
+      async function test() {
+        const res = await fetch('https://YOUR-BACKEND-ENDPOINT/health')
+        const data = await res.json()
+        alert(JSON.stringify(data))
+      }
+    </script>
+  </body>
+</html>
